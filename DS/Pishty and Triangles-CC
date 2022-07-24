@@ -1,0 +1,100 @@
+//https://www.codechef.com/problems/PSHTRG
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define ll long long
+#define pb push_back
+#define vi vector<int>
+#define dhoom3   ios::sync_with_stdio(0);cin.tie(0); cout.tie(0);
+
+const int N= 2e5+5;
+vector<int> tree[4*N];
+int ar[N];
+vector<int> merge(vector<int> a, vector<int> b){
+  int i=0,j=0;
+  vector<int> c;
+   while(i < a.size() && j < b.size()){
+       if(a[i]>=b[j])
+         c.pb(a[i]), ++i;
+       else 
+         c.pb(b[j]), ++j;
+   }
+   while(i < a.size()) c.pb(a[i]), ++i;
+   while(j < b.size()) c.pb(b[j]), ++j;
+   if(c.size() > 50) {
+      c.resize(50);
+   }
+   return c;
+}
+void build(int si,int ss,int se){
+   if(ss==se){
+       tree[si]={ar[ss]};
+       return;
+   }
+   int mid= (ss+se)/2;
+   int Left= 2*si, Right=2*si+1;
+   build(Left,ss,mid);
+   build(Right,mid+1,se);
+
+   tree[si]= merge(tree[Left], tree[Right]);
+}
+void update(int si,int ss,int se,int pos,int val){
+   if(pos < ss || pos > se) return;
+   if(ss == se){
+     tree[si]= {val};
+     return;
+   }
+   int mid= (ss+se)/2;
+   update(2*si,ss,mid,pos,val);
+   update(2*si+1,mid+1,se,pos,val);
+
+   tree[si]= merge(tree[2*si], tree[2*si+1]);
+}
+vector<int> query(int si,int ss,int se,int qs,int qe){
+    if(ss>qe || se<qs) return vector<int> (0);
+    if(ss>=qs && se<=qe) return tree[si];
+    int mid= (ss+se)/2;  
+    return merge(query(2*si,ss,mid,qs,qe),query(2*si+1,mid+1,se,qs,qe));
+}
+
+int main(){
+   #ifndef ONLINE_JUDGE
+    freopen("input.txt", "r", stdin);
+    freopen("output.txt", "w", stdout);
+   #endif
+   dhoom3; 
+   int Test=1;
+   //cin>>Test;
+   for(ll tt=1;tt<=Test;tt++){
+        ll n,q; cin>>n>>q;
+       for(ll i=1;i<=n;i++) cin>>ar[i];
+       build(1,1,n);
+         //cout<<tree[9][0]<<endl;
+       
+       while(q--){
+         ll t,l,r; cin>>t>>l>>r;
+         if(t==1){
+           update(1,1,n,l,r);
+         }
+         else{
+           vector<int> v= query(1,1,n,l,r);
+           ll ans=0;
+           cerr << v[0] << endl;
+            for(int i = 2; i < v.size(); i++) {
+              //cout<<v[i-2]<<' '<<v[i-1]<<' '<<v[i]<<endl;
+                if(v[i - 2] < v[i - 1] + v[i]) {
+                    ans = max(ans, (long long)(v[i] + v[i - 1]) +(long long)v[i - 2]);
+                }
+            }
+            cout<<ans<<endl;
+         }
+       }
+    
+   }
+   //cout << (ans ? "YES\n" : "No\n") ;
+   return 0;
+}
+/*
+
+*/
